@@ -1,0 +1,32 @@
+name: Aktualizacja XML co 2h
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'  # Co 2 godziny
+  workflow_dispatch:      # Pozwala odpalić ręcznie
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run script
+        run: python script.py
+
+      - name: Push results
+        run: |
+          git config --global user.name 'UpdateBot'
+          git config --global user.email 'bot@github.com'
+          git add output.xml
+          git commit -m "Automatyczna aktualizacja $(date)" || exit 0
+          git push
